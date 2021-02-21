@@ -26,14 +26,16 @@ end
 # f(x) = exp.(-x)
 # plot_title = "Chebyshev Approximation of e^x"
 # file_name = "chebyshev_approx_ex.png"
+# r = [1,5]
 f(x) = 1 ./ (x .^ 2 .+ 5)
 plot_title = "Chebyshev Approximation of 1/(x^2+5)"
 file_name = "chebyshev_approx_poly.png"
-pts = range(1, stop = 5, length = 10000)
+r = [-5,5]
+pts = range(r[1], stop = r[2], length = 10000)
 n_vec = [5, 8, 11, 30, 51]
 plot(pts, f(pts), label="function", title=plot_title)
 for n in n_vec
-    y = interpolate_unif(f, [1, 5], n, pts)
+    y = interpolate_unif(f, r, n, pts)
     display(plot!(pts,
                 y,
                 label=string("n=", n)))
