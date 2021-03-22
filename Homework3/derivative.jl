@@ -25,7 +25,8 @@ function derivative_2(f, r, n, pts)
                 product = 1
                 for m in 1:length(k)
                     if (m != j && m != i)
-                        product *= (x[ind_x] - x_k[m])  / (x_k[j] - x_k[m])
+                        product *= (x[ind_x] - x_k[m])  /
+                                (x_k[j] - x_k[m])
                     end
                 end
                 if (i != j)
