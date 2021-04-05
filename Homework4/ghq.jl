@@ -1,5 +1,6 @@
 using LinearAlgebra
 using Plots
+using DelimitedFiles
 
 function getGaussQuadNodesWeights(alpha, beta, n)
     J = zeros((n,n))
@@ -21,11 +22,7 @@ function getGaussQuadNodesWeights(alpha, beta, n)
 
 end
 
-n_end = 10
-results = zeros((n_end-4, ))
-for n = 5:n_end
-    # get Gaussian-Hermite Quadrature Nodes and Weights
-    println(n)
+function gauss_hermite(f, n)
     alpha = zeros((n,))
     beta = convert.(Float64, collect(1:n))
     beta = (beta .- 1) ./ 2.0
@@ -36,15 +33,39 @@ for n = 5:n_end
 
 
     # calculate the quadrature
-    mu = 0.15
-    sigma = 0.25
-    f(x) = 2 .* (1 .+ exp.(sqrt(2) .* sigma .* x .+ mu)) .^ 0.5
-    results[n-4] = sum(w .* f(t))
-    println(results[n-4])
+    return sum(w .* f(t) )
+end
+
+n_end = 30
+results = zeros((n_end-1, ))
+mu = 0.15
+sigma = 0.25
+f(x) = sqrt(2) .* sigma .* 2 .* 
+        (1 .+ exp.(sqrt(2) .* sigma .* x .+ mu)) .^ 0.5
+exact = gauss_hermite(f, 1000)
+n = 2:n_end
+for (i, n) in enumerate(n)
+    # get Gaussian-Hermite Quadrature Nodes and Weights
+    println(n)
+    results[i] = gauss_hermite(f, n)
+    println(results[i])
     println()
 end
-display(plot(collect(5:n_end), results,
+@show results
+@show error = abs.(results .- exact)
+display(plot(collect(2:n_end), results,
             title="Gaussian-Hermite Quadrature Estimation",
             xlabel="n",
             ylabel="Estimation"))
 png("GH_result.png")
+display(plot(collect(n), error,
+            seriestype= :scatter,
+            yscale=:log10,
+            ylim=[10^-15, 10^0],
+            xlabel="n",
+            ylabel="Error",
+            title="Error of Quadrature",
+            legend=false))
+png("GH_error.png")
+
+writedlm("error.csv", error)
