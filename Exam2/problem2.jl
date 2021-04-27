@@ -134,7 +134,7 @@ function bisection(f::Function, a::BigFloat, b::BigFloat, tol::BigFloat)
             b = x
         end
     end
-    return x
+    return Float64(x)
 end
 
 a = BigFloat(0)
