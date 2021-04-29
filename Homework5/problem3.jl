@@ -132,11 +132,49 @@ function backward_euler(f::Function, t_start::Float64, t_end::Float64, y_init, s
     return float(y)
 end
 
-e = 0.3
+tspan = (0.0, 1.0)
 y_init = [1-e; 0.0; 0.0; sqrt((1 + e) / (1 - e))]
-y = forward_euler(f, 0.0, 1.0, y_init, 50)
-# y = backward_euler(f, 0.0, 1.0, y_init, 1000)
-@show y
+for e in [0.3, 0.5, 0.7]
+    for steps in [50, 120, 200, 500, 1000]
+        t = collect(LinRange(0.0, 1.0, steps))
+        exact = solve_solution(e, tspan, steps)
+        y_FE = forward_euler(f, 0.0, 1.0, y_init, steps)
+        r_FE = y_FE[1, :] .^ 2 .+ y_FE[3, :] .^ 2
+        error_FE = exact[3] .- r_FE
+        if steps == 50
+            plot(t, error_FE,
+                label=string("N=", steps),
+                xlabel="t",
+                ylabel="Error of r",
+                title="Forward Euler")
+        elseif steps == 1000
+            display(plot!(t, error_FE, label=string("N=", steps)))
+            png(string("error_FE_", e ,".png"))
+        else
+            plot!(t, error_FE, label=string("N=", steps))
+        end
+    end
+
+    for steps in [50, 120, 200, 500, 1000]
+        t = collect(LinRange(0.0, 1.0, steps))
+        exact = solve_solution(e, tspan, steps)
+        y_BE = backward_euler(f, 0.0, 1.0, y_init, steps)
+        r_BE = y_BE[1, :] .^ 2 .+ y_BE[3, :] .^ 2
+        error_BE = exact[3] .- r_BE
+        if steps == 50
+            plot(t, error_BE,
+                label=string("N=", steps),
+                xlabel="t",
+                ylabel="Error of r",
+                title="Backward Euler")
+        elseif steps == 1000
+            display(plot!(t, error_BE, label=string("N=", steps)))
+            png(string("error_BE_", e ,".png"))
+        else
+            plot!(t, error_BE, label=string("N=", steps))
+        end
+    end
+end
 
 
 
