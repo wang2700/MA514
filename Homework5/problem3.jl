@@ -4,10 +4,12 @@ using LinearAlgebra
 # part 2
 function solve_u(e::BigFloat, t::BigFloat, eps::BigFloat)
     u_n = t
-    u_n_next = u_n - (u_n - e * sin(u_n) - t) * (1 - e * cos(u_n))
+    u_n_next = u_n - (u_n - e * sin(u_n) - t) * 
+            (1 - e * cos(u_n))
     while (abs(u_n - u_n_next) > eps)
         u_n = u_n_next
-        u_n_next = u_n - (u_n - e * sin(u_n) - t) * (1 - e * cos(u_n))
+        u_n_next = u_n - (u_n - e * sin(u_n) - t) * 
+                (1 - e * cos(u_n))
     end
     return float(u_n_next)
 end
@@ -18,7 +20,8 @@ function solve_solution(e::Float64, tspan, N)
     y = zeros((N,))
     r = zeros((N,))
     for i in 1:N
-        u = solve_u(BigFloat(e), BigFloat(t[i]), BigFloat(eps(Float64)))
+        u = solve_u(BigFloat(e), BigFloat(t[i]), 
+                    BigFloat(eps(Float64)))
         x[i] = cos(u) - e
         y[i] = sqrt(1 - e ^ 2.) * sin(u)
         r[i] = x[i] ^ 2. + y[i] ^ 2.
@@ -94,7 +97,8 @@ function g(y_plus, y, h)
     return output
 end
 
-function forward_euler(f::Function, t_start::Float64, t_end::Float64, y_init, steps::Int)
+function forward_euler(f::Function, t_start::Float64, 
+                    t_end::Float64, y_init, steps::Int)
     y = zeros((length(y_init), steps))
     h = (t_end - t_start) / steps
     t = t_start
@@ -106,18 +110,20 @@ function forward_euler(f::Function, t_start::Float64, t_end::Float64, y_init, st
     return y
 end
 
-function backward_euler(f::Function, t_start::Float64, t_end::Float64, y_init, steps::Int)
+function backward_euler(f::Function, t_start::Float64, 
+                    t_end::Float64, y_init, steps::Int)
     y = convert(Matrix{BigFloat}, zeros((length(y_init), steps)))
     h = BigFloat((t_end - t_start) / steps)
     t = t_start
     y[:, 1] = convert(Vector{BigFloat}, y_init)
     threshold = BigFloat(eps(Float64))
     for i in 1:steps-1
+        # use Newton's method to solve the system of
+        # non-linear equations from the Backward Euler
+        # method formula.
         y_cur = y[:, i]
-        y1 = inv(jacobian_g(y_cur, h))
-        y2 = g(y_cur, y[:, i], h)
-        y_diff = y1 * y2
-        y_next = y_cur - y_diff
+        y_next = y_cur - inv(jacobian_g(y_cur, h)) * 
+                g(y_cur, y[:, i], h)
         error = abs.(y_cur .- y_next)
         while (any(x->x>threshold, error))
             y_cur = y_next

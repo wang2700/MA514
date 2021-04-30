@@ -1,4 +1,5 @@
 using LinearAlgebra
+using Plots
 
 """
 This function will use Hune's method to simulate the Raptors problem
@@ -49,11 +50,17 @@ function simulate_raptors_Hune(angle)
     end
 
     for i=1:nsteps
-        dh, dr0, dr1, dr2 = compute_derivatives(angle,h,r0,r1,r2)
-        h += dh*dt
-        r0 += dr0*dt
-        r1 += dr1*dt
-        r2 += dr2*dt
+        dh_1, dr0_1, dr1_1, dr2_1 = compute_derivatives(angle,h,r0,r1,r2)
+        dh_2, dr0_2, dr1_2, dr2_2 = compute_derivatives(angle, 
+                                                        h + dt * dh_1,
+                                                        r0 + dt * dr0_1,
+                                                        r1 + dt * dr1_1,
+                                                        r2 + dt * dr2_1)
+
+        h += 0.5 * dt * (dh_1 + dh_2)
+        r0 += 0.5 * dt * (dr0_1 + dr0_2)
+        r1 += 0.5 * dt * (dr1_1 + dr1_2)
+        r2 += 0.5 * dt * (dr2_1 + dr2_2)
         t += dt
 
         hhist[:,i+1] = h
@@ -76,3 +83,16 @@ function simulate_raptors_Hune(angle)
     end
     return tend
 end
+
+N=1000
+t_range = pi
+angles = LinRange(-t_range, t_range, N)
+tend = zeros((N,))
+for (i, angle) in enumerate(angles)
+    tend[i] = simulate_raptors_Hune(angle)
+end
+display(plot(angles, tend,
+            xlabel="Angle",
+            ylabel="t",
+            legend=false))
+png("problem4.png")

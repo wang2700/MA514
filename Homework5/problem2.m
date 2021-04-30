@@ -5,6 +5,10 @@ tspan = [0.0, 17.1];
 [t, y] = ode45(@threebody, tspan, y_init);
 figure
 plot(y(:,1), y(:, 3))
+xlabel('u_1')
+ylabel('u_2')
+title('Solution using ode45')
+
 
 steps = 1000;
 h = (tspan(2) - tspan(1)) / steps;
